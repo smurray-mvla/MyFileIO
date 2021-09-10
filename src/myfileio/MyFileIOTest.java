@@ -9,8 +9,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
+@TestMethodOrder(OrderAnnotation.class)
 class MyFileIOTest {
 	MyFileIO fio = new MyFileIO();
 	File fd;
@@ -32,6 +36,7 @@ class MyFileIOTest {
 	}
 
 	@Test
+	@Order(1)
 	void testGetFileHandle() {
 		fd = fio.getFileHandle("");
 		System.out.println("Testing File Handle with empty name:");
@@ -40,6 +45,16 @@ class MyFileIOTest {
 		fd = fio.getFileHandle("output/.readme");
 		assertTrue(".readme".equals(fd.getName()));
 		assertTrue(fd.exists());
+		assertTrue(fd.length() >= 63);
+		assertTrue(fd.canRead());
+		assertTrue(fd.canWrite());
+		if (File.separatorChar == '\\') {
+			assertTrue("output\\.readme".equals(fd.getPath()));
+			
+		} else {
+			assertTrue("output/.readme".equals(fd.getPath()));
+		}
+		System.out.println("path = "+fd.getPath());
 	}
 
 	@Test
