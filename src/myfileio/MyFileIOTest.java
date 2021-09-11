@@ -1,8 +1,9 @@
 package myfileio;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
@@ -21,14 +22,41 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MyFileIOTest.
+ */
 @TestMethodOrder(OrderAnnotation.class)
 class MyFileIOTest {
+	
+	/** The fio. */
 	MyFileIO fio = new MyFileIO();
-
+	
+	/** The fr. */
+	FileReader fr;
+	
+	/** The fw. */
+	FileWriter fw;
+	
+	/** The br. */
+	BufferedReader br;
+	
+	/** The bw. */
+	BufferedWriter bw;
+	
+	/** The first 10. */
 	String[] first10 = {"mupnbhpirr","vsjjgiavuz","ubmugngmiw","mjhktqcwgj","wjkzgzccak"};
 	
+	/** The fd. */
 	private static File fd;
 	
+	/**
+	 * Sets the up before class. This will delete any test files created
+	 * by failed runs of this JUnit test before starting so that the
+	 * expected conditions of the File objects are correct
+	 *
+	 * @throws Exception the exception
+	 */
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		for (int i = 0; i <5; i++) {
@@ -39,18 +67,12 @@ class MyFileIOTest {
 		}
 	}
 
-	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
-
-	@BeforeEach
-	void setUp() throws Exception {
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-	}
-
+	/**
+	 * Test getFileHandle:
+	 *      1) Tests with empty name
+	 *      2) Tests with valid name (.readme file in output/ directory 
+	 *         so don't delete that!!!)
+	 */
 	@Test
 	@Order(1)
 	void testGetFileHandle() {
@@ -77,6 +99,12 @@ class MyFileIOTest {
 		System.out.println(" PASSED");
 	}
 
+	/**
+	 * Test createEmptyFile. Creates multiple files in the output/ 
+	 * directory, checking the File information for each BEFORE and
+	 * AFTER creation. Files are left present in the directory to
+	 * support deleteFile testing.
+	 */
 	@Test
 	@Order(2)
 	void testCreateEmptyFile() {
@@ -103,6 +131,12 @@ class MyFileIOTest {
 		}			
 	} 
 	
+	/**
+	 * Test delete File. Checks for existence of the files created by
+	 * the createEmptyFile test above. If they do not exist, then directly
+	 * create them. Opens a File object and checks validity of data BEFORE
+	 * and AFTER deletion, confirming that the file no longer exists.
+	 */
 	@Test
 	@Order(3)
 	void testDeleteFile() {
@@ -132,6 +166,12 @@ class MyFileIOTest {
 		}			
 	} 
 	
+	/**
+	 * Test checkTextFile. Test the checkTextFile produces all possible
+	 * status conditions (note that on Windows, it is impossible to test
+	 * correct operation of access violations, as Java on Windows does not
+	 * support disabling Read/Write access). 
+	 */
 	@Test
 	@Order(4)
 	void testCheckTextFile()  {
@@ -172,15 +212,25 @@ class MyFileIOTest {
 		System.out.println(" PASSED");
 	}
 	
+	/**
+	 * Test openFileReader and closeFile. 
+	 * 1) Verifies that attempting to open FileReader on an non-existent file 
+	 *    returns NULL. 
+	 * 2) Verifies that the FileReader is opened on each of the data/test_* 
+	 *    files, and that the contents of those files are correct (by looking 
+	 *    at the first 10 characters of each file). 
+	 * 3) Closes each file and then verifies closure by attempting a read() and
+	 *    expecting an IOException to be thrown..
+	 */
 	@Test
 	@Order(5)
-	void testOpenFileReader() {
+	void testOpenCloseFileReader() {
 		// this should not exist
 		System.out.println("\n\nTesting openFileReader:");
 		String fname = "output/.testcase1";
 		System.out.print("   Testing non-existent file: ");
 		File fd = new File(fname);
-		FileReader fr = fio.openFileReader(fd);
+		fr = fio.openFileReader(fd);
 		assertNull(fr);
 		System.out.println(" PASSED");
 		int size = 100;
@@ -206,19 +256,33 @@ class MyFileIOTest {
 			assertTrue(first10[i].equals(rdStr));
 			System.out.println(" OKAY");
 			size *=10;
+			System.out.print("   Testing closeFile for FileReader: ");
+			fio.closeFile(fr);
+			assertThrows(IOException.class,()->fr.read());
+			System.out.println(" PASSED");
 		}
 		
 	} 
 	
+	/**
+	 * Test openBufferedReader and closeFile. 
+	 * 1) Verifies that attempting to open BufferedReader on an non-existent file 
+	 *    returns NULL. 
+	 * 2) Verifies that the BufferedReader is opened on each of the data/test_* 
+	 *    files, and that the contents of those files are correct (by looking 
+	 *    at the first 10 characters of each file). 
+	 * 3) Closes each file and then verifies closure by attempting a read() and
+	 *    expecting an IOException to be thrown..
+	 */
 	@Test
 	@Order(6)
-	void testOpenBufferedReader() {
+	void testOpenCloseBufferedReader() {
 		// this should not exist
 		System.out.println("\n\nTesting openBufferedReader:");
 		String fname = "output/.testcase1";
 		System.out.print("   Testing non-existent file: ");
 		File fd = new File(fname);
-		BufferedReader br = fio.openBufferedReader(fd);
+		br = fio.openBufferedReader(fd);
 		assertNull(br);
 		System.out.println(" PASSED");
 		int size = 100;
@@ -243,13 +307,28 @@ class MyFileIOTest {
 			}
 			assertTrue(first10[i].equals(rdStr));			
 			System.out.println(" OKAY");
+			System.out.print("   Testing closeFile for BufferedReader: ");
+			fio.closeFile(br);
+			assertThrows(IOException.class,()->br.read());
+			System.out.println(" PASSED");
 			size *=10;
 		}
 	} 
 	
+	/**
+	 * Test openFileWriter and closeFile.
+	 * 1) Opens a FileReader for each of the data/test_* and a FileWriter 
+	 *    for a file  in the output/ directory (output/.test_*).
+	 * 2) Copies, 1 char at a time, the data/test_* file to the output/.test_*.
+	 * 3) Closes each file and then verifies closure by attempting a read() and
+	 *    a write on the respective FileReader and FileWriter objects, expecting
+	 *    an IOException to be thrown..
+	 * 4) Verifies the integrity of the write by checking the existence, size and
+	 *    contents (first 10 characters) of the created file then deletes the file.
+	 */
 	@Test
 	@Order(7)
-	void testOpenFileWriter() {
+	void testOpenCloseFileWriter() {
 		// this should not exist
 		File fwd;
 		File frd;
@@ -262,8 +341,8 @@ class MyFileIOTest {
 			System.out.print("      Copying data/test_"+i+" to output/.test_"+i);
 			assertTrue(frd.exists());
 			assertFalse(fwd.exists());
-			FileReader fr = fio.openFileReader(frd);
-			FileWriter fw = fio.openFileWriter(fwd);
+			fr = fio.openFileReader(frd);
+			fw = fio.openFileWriter(fwd);
 			for (int j=0; j < frd.length(); j++) {
 				try {
 					char aChar = (char) fr.read();
@@ -274,8 +353,12 @@ class MyFileIOTest {
 					e.printStackTrace();
 				}
 			}
+			System.out.println(" PASSED");
+			System.out.print("   Testing closeFile for FileReader and FileWriter: ");
 			fio.closeFile(fr);
 			fio.closeFile(fw);
+			assertThrows(IOException.class,()->fr.read());
+			assertThrows(IOException.class,()->fw.write('F'));
 			System.out.println(" PASSED");
 		}
 		System.out.println("   Checking integrity of copied files:");
@@ -306,9 +389,19 @@ class MyFileIOTest {
 		}
 	} 
 	
+	/**
+	 * 1) Opens a BufferedReader for each of the data/test_* and a BufferedWriter 
+	 *    for a file  in the output/ directory (output/.test_*).
+	 * 2) Copies, 1 char at a time, the data/test_* file to the output/.test_*.
+	 * 3) Closes each file and then verifies closure by attempting a read() and
+	 *    a write on the respective BufferedReader and BufferedWriter objects, expecting
+	 *    an IOException to be thrown..
+	 * 4) Verifies the integrity of the write by checking the existence, size and
+	 *    contents (first 10 characters) of the created file then deletes the file.
+	 */
 	@Test
 	@Order(8)
-	void testOpenBufferedWriter() {
+	void testOpenCloseBufferedWriter() {
 		// this should not exist
 		File bwd;
 		File brd;
@@ -321,8 +414,8 @@ class MyFileIOTest {
 			System.out.print("      Copying data/test_"+i+" to output/.test_"+i);
 			assertTrue(brd.exists());
 			assertFalse(bwd.exists());
-			BufferedReader br = fio.openBufferedReader(brd);
-			BufferedWriter bw = fio.openBufferedWriter(bwd);
+			br = fio.openBufferedReader(brd);
+			bw = fio.openBufferedWriter(bwd);
 			for (int j=0; j < brd.length(); j++) {
 				try {
 					char aChar = (char) br.read();
@@ -335,6 +428,10 @@ class MyFileIOTest {
 			}
 			fio.closeFile(br);
 			fio.closeFile(bw);
+			System.out.println(" PASSED");
+			System.out.print("   Testing closeFile for BufferedReader and BufferedWriter: ");
+			assertThrows(IOException.class,()->br.read());
+			assertThrows(IOException.class,()->bw.write('F'));
 			System.out.println(" PASSED");
 		}
 		System.out.println("   Checking integrity of copied files:");
