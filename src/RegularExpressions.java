@@ -1,19 +1,18 @@
 
 public class RegularExpressions {
-	
 
-	private String swapLastFirst(String in) {
-		String result = in.replaceAll("^\\s*(\\w+)\\s*,\\s*(\\w+)\s*","$2 $1");
+	String swapLastFirst(String in) {
+		String result = in.replaceAll("^\\s*(\\w*)\\s*,\\s*(\\w*)\\s*","$2 $1");
 		return result;
 	}
 
-	private String padTokensWithSpaces(String in) {
+	String padTokensWithSpaces(String in) {
 		String result = in.replaceAll("([\\+\\-\\*\\/\\(\\)])"," $1 ");
 		result = result.replaceFirst("^\\s*", "");
 		return result;
 	}
 	
-	private String[] identifyTokenType(String in) {
+	String[] identifyTokenType(String in) {
 		in = padTokensWithSpaces(in);
 		String[] tokens = in.split("\\s+");
 		for (int i = 0; i < tokens.length; i++) {
@@ -30,9 +29,9 @@ public class RegularExpressions {
 		return tokens;
 	} 
 	
-	private void printTokens(String[] tokens) {
+	void printTokens(String[] tokens) {
 		for (int i = 0; i < tokens.length; i++ ) {
-			System.out.println( tokens[i]);
+			System.out.println( tokens[i]+",");
 		}
 	}
 
